@@ -1,0 +1,29 @@
+service: product-service
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-east-1
+
+functions:
+  getProductsList:
+    handler: index.getProductsList
+    url:
+      cors: true
+    events:
+      - httpApi:
+          path: /products
+          method: get
+  getProductsById:
+    handler: index.getProductsById
+    url:
+      cors: true
+    events:
+      - httpApi:
+          path: /products/{productId}
+          method: get
+
+plugins:
+  - serverless-plugin-typescript

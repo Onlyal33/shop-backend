@@ -1,0 +1,71 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Product Service API
+  description: API for managing products
+paths:
+  /products:
+    get:
+      summary: Get a list of products
+      description: Returns a list of all available products
+      responses:
+        '200':
+          description: A list of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '500':
+          description: An error occurred while getting the products
+          schema:
+            $ref: '#/definitions/Error'
+  /products/{id}:
+    get:
+      summary: Get a product by its ID
+      description: Returns a single product by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single product
+          schema:
+            $ref: '#/definitions/Product'
+        '400':
+          description: Missing productId
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: An error occurred while getting the product
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "7567ec4b-b10c-48c5-9345-fc73c48a80a0"
+      title:
+        type: string
+        example: "ProductNew"
+      description:
+        type: string
+        example: "Short Product Description3"
+      price:
+        type: number
+        example: 10
+      count:
+        type: integer
+        example: 6
+  Error:
+    type: object
+    properties:
+      error:
+        type: string
