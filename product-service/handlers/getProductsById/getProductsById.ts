@@ -1,8 +1,10 @@
-import products from '../../products.js';
+import { getProductByIdService } from '../../services/productsService.js';
 
 export default async function getProductsById(event: {
   pathParameters?: { productId: string };
 }) {
+  console.log('getProductsById function invoked, event: ', JSON.stringify(event, null, 2));
+
   if (!event.pathParameters || !event.pathParameters.productId) {
     return {
       statusCode: 400,
@@ -20,12 +22,11 @@ export default async function getProductsById(event: {
   }
 
   const productId = event.pathParameters.productId;
-  let product: (typeof products)[0] | undefined;
 
   try {
-    product = products.find((product) => product.id === productId);
+    const product = await getProductByIdService(productId);
 
-    if (!product) {
+    if (product === null) {
       return {
         statusCode: 404,
         headers: {
@@ -40,6 +41,14 @@ export default async function getProductsById(event: {
         ),
       };
     }
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify(product, null, 2),
+    };
   } catch (error) {
     return {
       statusCode: 500,
@@ -56,28 +65,4 @@ export default async function getProductsById(event: {
       ),
     };
   }
-
-  if (!product) {
-    return {
-      statusCode: 404,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify(
-        {
-          error: 'Product not found',
-        },
-        null,
-        2
-      ),
-    };
-  }
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
-    body: JSON.stringify(product, null, 2),
-  };
 }
