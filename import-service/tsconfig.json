@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ESNext"],
+    "esModuleInterop": true,
+    "noEmit": false, // or `emitDeclarationOnly`
+    // "allowImportingTsExtensions": true,
+    "allowArbitraryExtensions": true,
+    // "verbatimModuleSyntax": true, // or `isolatedModules`
+    "types": ["jest", "node"],
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "rootDir": "./",
+    "outDir": ".build",
+  },
+  //"exclude": ["node_modules"]
+}
