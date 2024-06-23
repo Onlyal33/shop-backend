@@ -10,8 +10,42 @@ provider:
     PRODUCTS_TABLE: product
     STOCK_TABLE: stock
     REGION: ${self:provider.region}
+    CATALOG_ITEMS_QUEUE: !Ref CatalogItemsQueue
+    CREATE_PRODUCT_TOPIC_ARN:
+      Ref: CreateProductTopic
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:*
+          Resource:
+            - !GetAtt CatalogItemsQueue.Arn
+        - Effect: Allow
+          Action:
+            - sns:*
+          Resource:
+            Ref: CreateProductTopic
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.STOCK_TABLE}"
+  httpApi:
+    cors: true
 
 functions:
+  catalogBatchProcess:
+    handler: index.catalogBatchProcess
+    events:
+      - sqs:
+          arn: !GetAtt CatalogItemsQueue.Arn
+          batchSize: 5
   getProductsList:
     handler: index.getProductsList
     events:
@@ -30,6 +64,52 @@ functions:
       - httpApi:
           path: /products
           method: post
-
+resources:
+  Resources:
+    CatalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+    CreateProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: createProductTopic
+    LowPriceProductSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: "aleksei_lapygin@epam.com"
+        TopicArn:
+          Ref: CreateProductTopic
+        FilterPolicy:
+          price:
+            - numeric: ["<=", 100]
+    HighPriceProductSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: "example@example.com"
+        TopicArn:
+          Ref: CreateProductTopic
+        FilterPolicy:
+          price:
+            - numeric: [">", 100]
+  Outputs:
+    CatalogItemsQueueArn:
+      Description: "ARN of the catalog items queue"
+      Value:
+        Fn::GetAtt:
+          - CatalogItemsQueue
+          - Arn
+      Export:
+        Name: CatalogItemsQueueArn
+    CatalogItemsQueueUrl:
+      Description: "URL of the catalog items queue"
+      Value:
+        Fn::GetAtt:
+          - CatalogItemsQueue
+          - QueueUrl
+      Export:
+        Name: CatalogItemsQueueUrl
 plugins:
   - serverless-plugin-typescript

@@ -8,6 +8,7 @@ provider:
   environment:
     REGION: ${self:provider.region}
     S3BUCKET: upload-bucket-50342115
+    SQS_QUEUE_URL: !ImportValue CatalogItemsQueueUrl
   iam:
     role:
       statements:
@@ -21,6 +22,10 @@ provider:
             - s3:PutObject
             - s3:DeleteObject
           Resource: "arn:aws:s3:::${self:provider.environment.S3BUCKET}/*"
+        - Effect: "Allow"
+          Action:
+            - "sqs:*"
+          Resource: !ImportValue CatalogItemsQueueArn
   httpApi:
     cors: true
 
