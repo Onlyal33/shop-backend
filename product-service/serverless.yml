@@ -6,24 +6,30 @@ provider:
   runtime: nodejs18.x
   stage: dev
   region: us-east-1
+  environment:
+    PRODUCTS_TABLE: product
+    STOCK_TABLE: stock
+    REGION: ${self:provider.region}
 
 functions:
   getProductsList:
     handler: index.getProductsList
-    url:
-      cors: true
     events:
       - httpApi:
           path: /products
           method: get
   getProductsById:
     handler: index.getProductsById
-    url:
-      cors: true
     events:
       - httpApi:
           path: /products/{productId}
           method: get
+  createProduct:
+    handler: index.createProduct
+    events:
+      - httpApi:
+          path: /products
+          method: post
 
 plugins:
   - serverless-plugin-typescript

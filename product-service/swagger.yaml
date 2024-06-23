@@ -19,6 +19,27 @@ paths:
           description: An error occurred while getting the products
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product created successfully
+          schema:
+            $ref: '#/definitions/Product'
+        '400':
+          description: Invalid product data
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Failed to create product
+          schema:
+            $ref: '#/definitions/Error'
   /products/{id}:
     get:
       summary: Get a product by its ID

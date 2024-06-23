@@ -1,7 +1,10 @@
-import products from '../../products.js';
+import { getProductsListService } from '../../services/productsService.js';
 
-export default async function getProductsList () {
+export default async function getProductsList() {
+  console.log('getProductsList function invoked');
+
   try {
+    const products = await getProductsListService();
     return {
       statusCode: 200,
       headers: {
@@ -17,7 +20,8 @@ export default async function getProductsList () {
       },
       body: JSON.stringify(
         {
-          error: 'An error occurred while getting the product: ' + error.message,
+          error:
+            'An error occurred while getting the product: ' + error.message,
         },
         null,
         2
