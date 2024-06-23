@@ -1,0 +1,46 @@
+service: import-service
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    REGION: ${self:provider.region}
+    S3BUCKET: upload-bucket-50342115
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:ListBucket
+          Resource: "arn:aws:s3:::${self:provider.environment.S3BUCKET}"
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Resource: "arn:aws:s3:::${self:provider.environment.S3BUCKET}/*"
+  httpApi:
+    cors: true
+
+functions:
+  importProductsFile:
+    handler: index.importProductsFile
+    events:
+      - httpApi:
+          path: /import
+          method: get
+  importFileParser:
+    handler: index.importFileParser
+    events:
+      - s3:
+          bucket: ${self:provider.environment.S3BUCKET}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+            - suffix: .csv
+          existing: true
+
+plugins:
+  - serverless-plugin-typescript
