@@ -28,6 +28,13 @@ provider:
           Resource: !ImportValue CatalogItemsQueueArn
   httpApi:
     cors: true
+    authorizers:
+      basicAuthorizer:
+        type: request
+        functionArn: arn:aws:lambda:${aws:region}:${aws:accountId}:function:authorization-service-dev-basicAuthorizer
+        resultTtlInSeconds: 0
+        identitySource:
+          - $request.header.Authorization
 
 functions:
   importProductsFile:
@@ -36,6 +43,8 @@ functions:
       - httpApi:
           path: /import
           method: get
+          authorizer:
+            name: basicAuthorizer
   importFileParser:
     handler: index.importFileParser
     events:
